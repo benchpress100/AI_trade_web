@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors');
 require('dotenv').config();
 
 const { initDB } = require('./config/database');
@@ -12,29 +11,26 @@ const PORT = process.env.PORT || 5000;
 // 中间件
 console.log('🔧 CORS_ORIGIN:', process.env.CORS_ORIGIN);
 
-// CORS 配置
-const allowedOrigins = [
-  process.env.CORS_ORIGIN,
-  'http://localhost:3000',
-  'https://ai-trade-h2btkza5o-8yanziz-6938s-projects.vercel.app'
-].filter(Boolean);
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // 允许没有 origin 的请求（如 Postman）
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('❌ Blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// 手动处理 CORS（绕过 Railway 代理）
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log('📨 Request from origin:', origin);
+  
+  // 允许所有 Vercel 部署的域名
+  if (origin && (origin.includes('vercel.app') || origin.includes('localhost'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  
+  // 处理 preflight 请求
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
