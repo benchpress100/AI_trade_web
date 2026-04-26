@@ -43,17 +43,14 @@ exports.register = async (req, res) => {
       return res.status(500).json({ error: '创建账户失败' });
     }
 
-    const user = db.prepare(
-      'SELECT id, username, email, is_admin, created_at FROM users WHERE id = ?'
-    ).get(userId);
-
+    // 直接返回注册信息，不再查询（避免 sql.js 的查询延迟问题）
     res.status(201).json({
       message: '注册成功',
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        isAdmin: user.is_admin === 1
+        id: userId,
+        username: username,
+        email: email,
+        isAdmin: false
       }
     });
   } catch (error) {
