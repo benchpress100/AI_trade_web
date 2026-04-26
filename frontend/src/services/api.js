@@ -49,6 +49,7 @@ export const tradeAPI = {
   getTrades: () => api.get('/trades'),
   getPositions: () => api.get('/trades/positions'),
   getAccount: () => api.get('/trades/account'),
+  getPublicInfo: () => axios.get(`${API_BASE_URL}/trades/public`), // 不需要token的公开接口
 };
 
 export default api;

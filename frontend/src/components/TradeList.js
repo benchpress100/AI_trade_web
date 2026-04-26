@@ -1,10 +1,10 @@
 import React from 'react';
 
 const TradeList = ({ trades }) => {
-  const formatNumber = (num) => {
+  const formatNumber = (num, decimals = 4) => {
     return new Intl.NumberFormat('zh-CN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
     }).format(num);
   };
 
@@ -40,6 +40,9 @@ const TradeList = ({ trades }) => {
                 股票代码
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                股票名称
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 操作
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -70,6 +73,11 @@ const TradeList = ({ trades }) => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-600">
+                    {trade.symbol_name || '-'}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       trade.action === 'BUY'
@@ -82,17 +90,17 @@ const TradeList = ({ trades }) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {formatNumber(trade.quantity)}
+                    {formatNumber(trade.quantity, 2)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    ¥{formatNumber(trade.price)}
+                    ¥{formatNumber(trade.price, 4)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    ¥{formatNumber(trade.total_amount)}
+                    ¥{formatNumber(trade.total_amount, 2)}
                   </div>
                 </td>
                 <td className="px-6 py-4">

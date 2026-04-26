@@ -2,7 +2,7 @@ const { db } = require('../config/database');
 
 // 发布交易操作（仅管理员）
 exports.createTrade = async (req, res) => {
-  const { symbol, action, quantity, price, note } = req.body;
+  const { symbol, symbolName, action, quantity, price, note } = req.body;
   const userId = req.user.id;
 
   try {
@@ -10,14 +10,14 @@ exports.createTrade = async (req, res) => {
 
     // 插入交易记录
     const tradeResult = db.prepare(
-      `INSERT INTO trades (user_id, symbol, action, quantity, price, total_amount, note) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).run(userId, symbol.toUpperCase(), action.toUpperCase(), quantity, price, totalAmount, note || null);
+      `INSERT INTO trades (user_id, symbol, symbol_name, action, quantity, price, total_amount, note) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(userId, symbol.toUpperCase(), symbolName || null, action.toUpperCase(), quantity, price, totalAmount, note || null);
 
     const tradeId = tradeResult.lastInsertRowid;
 
     // 更新持仓
-    updatePosition(userId, symbol.toUpperCase(), action.toUpperCase(), quantity, price);
+    updatePosition(userId, symbol.toUpperCase(), symbolName, action.toUpperCase(), quantity, price);
 
     // 更新账户资金
     updateAccount(userId, action.toUpperCase(), totalAmount);
@@ -35,7 +35,7 @@ exports.createTrade = async (req, res) => {
 };
 
 // 更新持仓
-function updatePosition(userId, symbol, action, quantity, price) {
+function updatePosition(userId, symbol, symbolName, action, quantity, price) {
   const position = db.prepare(
     'SELECT * FROM positions WHERE user_id = ? AND symbol = ?'
   ).get(userId, symbol);
@@ -44,9 +44,9 @@ function updatePosition(userId, symbol, action, quantity, price) {
     // 新建持仓（买入）
     if (action === 'BUY') {
       db.prepare(
-        `INSERT INTO positions (user_id, symbol, quantity, avg_cost, current_price, market_value, profit_loss, profit_loss_percent) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(userId, symbol, quantity, price, price, quantity * price, 0, 0);
+        `INSERT INTO positions (user_id, symbol, symbol_name, quantity, avg_cost, current_price, market_value, profit_loss, profit_loss_percent) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run(userId, symbol, symbolName || null, quantity, price, price, quantity * price, 0, 0);
     }
   } else {
     if (action === 'BUY') {
@@ -59,7 +59,7 @@ function updatePosition(userId, symbol, action, quantity, price) {
       db.prepare(
         `UPDATE positions 
          SET quantity = ?, avg_cost = ?, current_price = ?, market_value = ?, 
-             profit_loss = ?, profit_loss_percent = ?, updated_at = CURRENT_TIMESTAMP 
+             profit_loss = ?, profit_loss_percent = ?, symbol_name = ?, updated_at = CURRENT_TIMESTAMP 
          WHERE user_id = ? AND symbol = ?`
       ).run(
         newQuantity, 
@@ -68,6 +68,7 @@ function updatePosition(userId, symbol, action, quantity, price) {
         newQuantity * price,
         profitLoss,
         profitLossPercent,
+        symbolName || position.symbol_name,
         userId, 
         symbol
       );
@@ -193,6 +194,37 @@ exports.getAccount = async (req, res) => {
     res.json({ account });
   } catch (error) {
     console.error('获取账户信息错误:', error);
+    res.status(500).json({ error: '服务器错误' });
+  }
+};
+
+// 获取公开信息（访客模式，不需要登录）
+exports.getPublicInfo = async (req, res) => {
+  try {
+    // 获取总盈利率
+    const account = db.prepare(
+      `SELECT total_profit_loss_percent 
+       FROM account a 
+       JOIN users u ON a.user_id = u.id 
+       WHERE u.is_admin = 1`
+    ).get();
+
+    // 获取第一支股票的持仓
+    const firstPosition = db.prepare(
+      `SELECT symbol, symbol_name, quantity, avg_cost, current_price, market_value, profit_loss, profit_loss_percent 
+       FROM positions p 
+       JOIN users u ON p.user_id = u.id 
+       WHERE u.is_admin = 1 
+       ORDER BY p.id ASC 
+       LIMIT 1`
+    ).get();
+
+    res.json({
+      totalProfitLossPercent: account ? account.total_profit_loss_percent : 0,
+      firstPosition: firstPosition || null
+    });
+  } catch (error) {
+    console.error('获取公开信息错误:', error);
     res.status(500).json({ error: '服务器错误' });
   }
 };

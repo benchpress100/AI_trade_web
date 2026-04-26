@@ -1,10 +1,10 @@
 import React from 'react';
 
 const PositionList = ({ positions }) => {
-  const formatNumber = (num) => {
+  const formatNumber = (num, decimals = 4) => {
     return new Intl.NumberFormat('zh-CN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
     }).format(num);
   };
 
@@ -24,6 +24,9 @@ const PositionList = ({ positions }) => {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 股票代码
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                股票名称
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 持仓数量
@@ -54,23 +57,28 @@ const PositionList = ({ positions }) => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {formatNumber(position.quantity)}
+                  <div className="text-sm text-gray-600">
+                    {position.symbol_name || '-'}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    ¥{formatNumber(position.avg_cost)}
+                    {formatNumber(position.quantity, 2)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    ¥{formatNumber(position.current_price)}
+                    ¥{formatNumber(position.avg_cost, 4)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    ¥{formatNumber(position.market_value)}
+                    ¥{formatNumber(position.current_price, 4)}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    ¥{formatNumber(position.market_value, 2)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -81,7 +89,7 @@ const PositionList = ({ positions }) => {
                         : 'text-danger'
                     }`}
                   >
-                    ¥{formatNumber(position.profit_loss)}
+                    ¥{formatNumber(position.profit_loss, 2)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -93,7 +101,7 @@ const PositionList = ({ positions }) => {
                     }`}
                   >
                     {parseFloat(position.profit_loss_percent) >= 0 ? '+' : ''}
-                    {formatNumber(position.profit_loss_percent)}%
+                    {formatNumber(position.profit_loss_percent, 2)}%
                   </div>
                 </td>
               </tr>

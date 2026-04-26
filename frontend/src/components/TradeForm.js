@@ -4,6 +4,7 @@ import { tradeAPI } from '../services/api';
 const TradeForm = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
     symbol: '',
+    symbolName: '',
     action: 'BUY',
     quantity: '',
     price: '',
@@ -29,6 +30,7 @@ const TradeForm = ({ onSuccess }) => {
       alert('交易操作发布成功！');
       setFormData({
         symbol: '',
+        symbolName: '',
         action: 'BUY',
         quantity: '',
         price: '',
@@ -65,6 +67,20 @@ const TradeForm = ({ onSuccess }) => {
               placeholder="例如: AAPL"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
               value={formData.symbol}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              股票名称
+            </label>
+            <input
+              type="text"
+              name="symbolName"
+              placeholder="例如: 苹果公司"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              value={formData.symbolName}
               onChange={handleChange}
             />
           </div>
@@ -109,9 +125,9 @@ const TradeForm = ({ onSuccess }) => {
               type="number"
               name="price"
               required
-              step="0.01"
-              min="0.01"
-              placeholder="150.50"
+              step="0.0001"
+              min="0.0001"
+              placeholder="150.5000"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
               value={formData.price}
               onChange={handleChange}
