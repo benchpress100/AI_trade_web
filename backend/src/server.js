@@ -58,8 +58,9 @@ app.use((err, req, res, next) => {
 // 初始化数据库后启动服务器
 initDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`\n🚀 服务器运行在 http://localhost:${PORT}`);
-    console.log(`📊 环境: ${process.env.NODE_ENV || 'development'}\n`);
+    console.log(`\n🚀 服务器运行在端口: ${PORT}`);
+    console.log(`📊 环境: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🌐 CORS 允许: vercel.app 和 localhost 域名\n`);
   });
 }).catch(err => {
   console.error('数据库初始化失败:', err);
