@@ -209,19 +209,18 @@ exports.getPublicInfo = async (req, res) => {
        WHERE u.is_admin = 1`
     ).get();
 
-    // 获取第一支股票的持仓
-    const firstPosition = db.prepare(
+    // 获取所有持仓（按ID排序）
+    const positions = db.prepare(
       `SELECT symbol, symbol_name, quantity, avg_cost, current_price, market_value, profit_loss, profit_loss_percent 
        FROM positions p 
        JOIN users u ON p.user_id = u.id 
        WHERE u.is_admin = 1 
-       ORDER BY p.id ASC 
-       LIMIT 1`
-    ).get();
+       ORDER BY p.id ASC`
+    ).all();
 
     res.json({
       totalProfitLossPercent: account ? account.total_profit_loss_percent : 0,
-      firstPosition: firstPosition || null
+      positions: positions || []
     });
   } catch (error) {
     console.error('获取公开信息错误:', error);

@@ -87,74 +87,113 @@ const PublicView = () => {
             </div>
           </div>
 
-          {/* 第一支股票持仓 */}
-          {publicInfo?.firstPosition ? (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">持仓展示</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <div className="text-sm text-gray-500">股票代码</div>
-                  <div className="text-lg font-medium text-gray-900">
-                    {publicInfo.firstPosition.symbol}
-                  </div>
-                </div>
-                {publicInfo.firstPosition.symbol_name && (
-                  <div>
-                    <div className="text-sm text-gray-500">股票名称</div>
-                    <div className="text-lg font-medium text-gray-900">
-                      {publicInfo.firstPosition.symbol_name}
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <div className="text-sm text-gray-500">持仓数量</div>
-                  <div className="text-lg font-medium text-gray-900">
-                    {formatNumber(publicInfo.firstPosition.quantity, 2)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">成本价</div>
-                  <div className="text-lg font-medium text-gray-900">
-                    ¥{formatNumber(publicInfo.firstPosition.avg_cost, 4)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">当前价</div>
-                  <div className="text-lg font-medium text-gray-900">
-                    ¥{formatNumber(publicInfo.firstPosition.current_price, 4)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">市值</div>
-                  <div className="text-lg font-medium text-gray-900">
-                    ¥{formatNumber(publicInfo.firstPosition.market_value, 2)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">盈亏</div>
-                  <div
-                    className={`text-lg font-medium ${
-                      parseFloat(publicInfo.firstPosition.profit_loss) >= 0
-                        ? 'text-success'
-                        : 'text-danger'
-                    }`}
-                  >
-                    ¥{formatNumber(publicInfo.firstPosition.profit_loss, 2)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">盈亏率</div>
-                  <div
-                    className={`text-lg font-medium ${
-                      parseFloat(publicInfo.firstPosition.profit_loss_percent) >= 0
-                        ? 'text-success'
-                        : 'text-danger'
-                    }`}
-                  >
-                    {parseFloat(publicInfo.firstPosition.profit_loss_percent) >= 0 ? '+' : ''}
-                    {formatNumber(publicInfo.firstPosition.profit_loss_percent, 2)}%
-                  </div>
-                </div>
+          {/* 持仓列表 */}
+          {publicInfo?.positions && publicInfo.positions.length > 0 ? (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">持仓信息</h2>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        股票代码
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        股票名称
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        持仓数量
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        成本价
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        当前价
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        市值
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        盈亏
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        盈亏率
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {publicInfo.positions.map((position, index) => {
+                      const isFirst = index === 0;
+                      return (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {position.symbol}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">
+                              {position.symbol_name || '-'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {isFirst ? formatNumber(position.quantity, 2) : '***'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {isFirst ? `¥${formatNumber(position.avg_cost, 4)}` : '¥***'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {isFirst ? `¥${formatNumber(position.current_price, 4)}` : '¥***'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {isFirst ? `¥${formatNumber(position.market_value, 2)}` : '¥***'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {isFirst ? (
+                              <div
+                                className={`text-sm font-medium ${
+                                  parseFloat(position.profit_loss) >= 0
+                                    ? 'text-success'
+                                    : 'text-danger'
+                                }`}
+                              >
+                                ¥{formatNumber(position.profit_loss, 2)}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-gray-400">¥***</div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {isFirst ? (
+                              <div
+                                className={`text-sm font-medium ${
+                                  parseFloat(position.profit_loss_percent) >= 0
+                                    ? 'text-success'
+                                    : 'text-danger'
+                                }`}
+                              >
+                                {parseFloat(position.profit_loss_percent) >= 0 ? '+' : ''}
+                                {formatNumber(position.profit_loss_percent, 2)}%
+                              </div>
+                            ) : (
+                              <div className="text-sm text-gray-400">***%</div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           ) : (
@@ -182,7 +221,7 @@ const PublicView = () => {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-blue-700">
-                  登录后可查看完整的交易记录、所有持仓信息和账户详情
+                  登录后可查看完整的交易记录、所有持仓详情和账户信息
                 </p>
               </div>
             </div>
