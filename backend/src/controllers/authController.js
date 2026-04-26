@@ -27,18 +27,20 @@ exports.register = async (req, res) => {
 
     const userId = result.lastInsertRowid;
 
-    // 为新用户创建账户（检查是否已存在）
-    const existingAccount = db.prepare('SELECT * FROM account WHERE user_id = ?').get(userId);
-    
-    if (!existingAccount) {
-      try {
-        db.prepare('INSERT INTO account (user_id) VALUES (?)').run(userId);
-      } catch (accountError) {
-        console.error('创建账户失败:', accountError);
-        // 如果创建账户失败，删除刚创建的用户
-        db.prepare('DELETE FROM users WHERE id = ?').run(userId);
-        throw new Error('创建账户失败');
+    // 为新用户创建账户（使用 INSERT OR IGNORE 避免重复）
+    try {
+      db.prepare('INSERT OR IGNORE INTO account (user_id) VALUES (?)').run(userId);
+      
+      // 验证 account 是否创建成功
+      const accountCreated = db.prepare('SELECT * FROM account WHERE user_id = ?').get(userId);
+      if (!accountCreated) {
+        throw new Error('账户创建验证失败');
       }
+    } catch (accountError) {
+      console.error('创建账户失败:', accountError);
+      // 如果创建账户失败，删除刚创建的用户
+      db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+      return res.status(500).json({ error: '创建账户失败' });
     }
 
     const user = db.prepare(
